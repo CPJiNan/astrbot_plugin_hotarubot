@@ -2,7 +2,6 @@ from astrbot.api import logger
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.core.message.components import Plain, Image
-from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 from pathlib import Path
 
 from .http import HttpUtils
@@ -24,7 +23,7 @@ class HotaruBotPlugin(Star):
 
     async def initialize(self):
         logger.info("插件加载成功。")
-        storage_path = get_astrbot_data_path() / "plugin_data" / self.name
+        storage_path = Path.cwd() / "data" / "plugin_data" / self.name
         self.user_storage = UserStorage(storage_path)
         self.image_storage = ImageStorage(storage_path)
         self.images_dir = storage_path / "images"
