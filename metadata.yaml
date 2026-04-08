@@ -1,6 +1,6 @@
 name: astrbot_plugin_hotarubot
-display_name: HotaruBot
-desc: 萤宝BOT。
+display_name: 萤宝BOT
+desc: 汐见萤 Bot 插件。
 version: v1.0.0
 author: 季楠
 repo: https://github.com/CPJiNan/astrbot_plugin_hotarubot

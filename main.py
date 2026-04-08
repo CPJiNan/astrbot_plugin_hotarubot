@@ -2,6 +2,7 @@ from astrbot.api import logger
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.core.message.components import Plain, Image
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path
 from pathlib import Path
 
 from .http import HttpUtils
@@ -22,18 +23,18 @@ class HotaruBotPlugin(Star):
         self.images_dir = None
 
     async def initialize(self):
-        logger.info("HotaruBot 插件加载成功。")
-        storage_path = Path.cwd() / "data" / "plugin_data" / self.name
+        logger.info("插件加载成功。")
+        storage_path = get_astrbot_data_path() / "plugin_data" / self.name
         self.user_storage = UserStorage(storage_path)
         self.image_storage = ImageStorage(storage_path)
         self.images_dir = storage_path / "images"
         self.images_dir.mkdir(parents=True, exist_ok=True)
 
     async def terminate(self):
-        logger.info("HotaruBot 插件卸载成功。")
+        logger.info("插件卸载成功。")
 
     @filter.command("命令帮助", alias={"help"})
-    async def help_command(self, event: AstrMessageEvent):
+    async def help(self, event: AstrMessageEvent):
         """命令帮助"""
         message = event.message_str
         try:
@@ -64,13 +65,13 @@ class HotaruBotPlugin(Star):
         elif current_page == 2:
             help_text = "萤宝BOT 命令帮助：" + \
                         "\n" + \
-                        "\n /用户信息 [QQ号] - 查看用户信息" + \
-                        "\n /新增用户 <QQ号> - 新增用户数据" + \
-                        "\n /移除用户 <QQ号> - 移除用户数据" + \
+                        "\n /用户管理 用户信息 [QQ号] - 查看用户信息" + \
+                        "\n /用户管理 新增用户 <QQ号> - 新增用户数据" + \
+                        "\n /用户管理 移除用户 <QQ号> - 移除用户数据" + \
                         "\n" + \
-                        "\n /查看用户权限 <QQ号> - 查看用户的权限" + \
-                        "\n /新增用户权限 <QQ号> <权限> - 为用户新增权限" + \
-                        "\n /移除用户权限 <QQ号> <权限> - 移除用户的权限" + \
+                        "\n /权限管理 查看用户权限 <QQ号> - 查看用户的权限" + \
+                        "\n /权限管理 新增用户权限 <QQ号> <权限> - 为用户新增权限" + \
+                        "\n /权限管理 移除用户权限 <QQ号> <权限> - 移除用户的权限" + \
                         "\n" + \
                         "\n 第 2 页 / 共 3 页"
         elif current_page == 3:
@@ -84,16 +85,21 @@ class HotaruBotPlugin(Star):
 
         yield event.plain_result(help_text)
 
-    @filter.command("用户信息")
-    async def user_info_command(self, event: AstrMessageEvent, user_id: int = None):
+    @filter.command_group("用户管理")
+    def user(self):
+        """用户管理"""
+        pass
+
+    @user.command("用户信息")
+    async def user_info(self, event: AstrMessageEvent, user_id: int = None):
         """查看用户信息"""
         if user_id is None:
             user_id = int(event.get_sender_id())
 
         yield event.plain_result(f"用户 ID： {user_id}")
 
-    @filter.command("新增用户")
-    async def add_user_command(self, event: AstrMessageEvent, user_id: int):
+    @user.command("新增用户")
+    async def add_user(self, event: AstrMessageEvent, user_id: int):
         """新增用户"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin"):
@@ -102,8 +108,8 @@ class HotaruBotPlugin(Star):
         self.user_storage.add_user(user_id)
         yield event.plain_result(f"已新增用户 {user_id}。")
 
-    @filter.command("移除用户")
-    async def remove_user_command(self, event: AstrMessageEvent, user_id: int):
+    @user.command("移除用户")
+    async def remove_user(self, event: AstrMessageEvent, user_id: int):
         """移除用户"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin"):
@@ -112,8 +118,13 @@ class HotaruBotPlugin(Star):
         self.user_storage.remove_user(user_id)
         yield event.plain_result(f"已移除用户 {user_id}。")
 
-    @filter.command("查看用户权限")
-    async def get_permissions_command(self, event: AstrMessageEvent, user_id: int):
+    @filter.command_group("权限管理")
+    def permission(self):
+        """权限管理"""
+        pass
+
+    @permission.command("查看用户权限")
+    async def get_permissions(self, event: AstrMessageEvent, user_id: int):
         """查看用户权限"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
@@ -127,8 +138,8 @@ class HotaruBotPlugin(Star):
         else:
             yield event.plain_result(f"用户 {user_id} 没有任何权限。")
 
-    @filter.command("新增用户权限")
-    async def add_permission_command(self, event: AstrMessageEvent, user_id: int, permission: str):
+    @permission.command("新增用户权限")
+    async def add_permission(self, event: AstrMessageEvent, user_id: int, permission: str):
         """新增用户权限"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
@@ -138,8 +149,8 @@ class HotaruBotPlugin(Star):
         self.user_storage.add_permission(user_id, permission)
         yield event.plain_result(f"已为用户 {user_id} 新增 {permission} 权限。")
 
-    @filter.command("移除用户权限")
-    async def remove_permission_command(self, event: AstrMessageEvent, user_id: int, permission: str):
+    @permission.command("移除用户权限")
+    async def remove_permission(self, event: AstrMessageEvent, user_id: int, permission: str):
         """移除用户权限"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
@@ -150,7 +161,7 @@ class HotaruBotPlugin(Star):
         yield event.plain_result(f"已移除用户 {user_id} 的 {permission} 权限。")
 
     @filter.command("会萤吗")
-    async def roll_command(self, event: AstrMessageEvent):
+    async def roll(self, event: AstrMessageEvent):
         """随机数生成器"""
         import random
         value = random.randint(0, 100)
@@ -172,7 +183,7 @@ class HotaruBotPlugin(Star):
         yield event.plain_result(message)
 
     @filter.command("萤图ID")
-    async def get_image_by_id_command(self, event: AstrMessageEvent, image_id: int):
+    async def get_image_by_id(self, event: AstrMessageEvent, image_id: int):
         """根据 ID 搜索图片"""
         image = self.image_storage.get_image_by_id(image_id)
         if not image:
@@ -196,7 +207,7 @@ class HotaruBotPlugin(Star):
             yield event.plain_result(message)
 
     @filter.command("萤图描述")
-    async def get_image_by_description_command(self, event: AstrMessageEvent, description: str):
+    async def get_image_by_description(self, event: AstrMessageEvent, description: str):
         """根据描述搜索图片"""
         images = self.image_storage.get_images_by_description(description)
         if not images:
@@ -222,7 +233,7 @@ class HotaruBotPlugin(Star):
             yield event.plain_result(message)
 
     @filter.command("随机萤图")
-    async def get_random_image_command(self, event: AstrMessageEvent):
+    async def get_random_image(self, event: AstrMessageEvent):
         """随机汐见萤图片"""
         image = self.image_storage.get_random_image()
         if not image:
@@ -246,7 +257,7 @@ class HotaruBotPlugin(Star):
             yield event.plain_result(message)
 
     @filter.command("最新萤图")
-    async def get_latest_image_command(self, event: AstrMessageEvent):
+    async def get_latest_image(self, event: AstrMessageEvent):
         """最新汐见萤图片"""
         image = self.image_storage.get_latest_image()
         if not image:
@@ -270,7 +281,7 @@ class HotaruBotPlugin(Star):
             yield event.plain_result(message)
 
     @filter.command("收萤")
-    async def upload_image_command(self, event: AstrMessageEvent):
+    async def upload_image(self, event: AstrMessageEvent):
         """收录回复的消息中所有的图片"""
         user_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(user_id, "admin") and not self.user_storage.has_permission(user_id,
@@ -348,7 +359,7 @@ class HotaruBotPlugin(Star):
             yield event.plain_result(f"成功收萤 {len(images)} 张图片。{image_info}")
 
     @filter.command("设置描述")
-    async def set_image_description_command(self, event: AstrMessageEvent, image_id: int, description: str):
+    async def set_image_description(self, event: AstrMessageEvent, image_id: int, description: str):
         """设置图片描述"""
         user_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(user_id, "admin") and not self.user_storage.has_permission(user_id,
@@ -364,7 +375,7 @@ class HotaruBotPlugin(Star):
         yield event.plain_result(f"已设置「{image_id}」的图片描述为：{description}")
 
     @filter.command("新增收萤员")
-    async def add_uploader_command(self, event: AstrMessageEvent, user_id: int):
+    async def add_uploader(self, event: AstrMessageEvent, user_id: int):
         """为用户新增图片收录权限"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
@@ -377,7 +388,7 @@ class HotaruBotPlugin(Star):
         yield event.plain_result(f"已为用户 {user_id} 新增收萤员权限。")
 
     @filter.command("移除收萤员")
-    async def remove_uploader_command(self, event: AstrMessageEvent, user_id: int):
+    async def remove_uploader(self, event: AstrMessageEvent, user_id: int):
         """移除用户的图片收录权限"""
         sender_id = int(event.get_sender_id())
         if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
