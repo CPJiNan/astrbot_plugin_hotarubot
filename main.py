@@ -1,7 +1,7 @@
 from astrbot.api import logger
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
-from astrbot.core.message.components import Plain, Image
+from astrbot.core.message.components import Plain, Image, Record
 from pathlib import Path
 
 from .http import HttpUtils
@@ -407,6 +407,6 @@ class HotaruBotPlugin(Star):
         """发送起死開戦语音"""
         path = str(self.record_dir / "起死開戦.wav")
         chain = [
-            Comp.Record(file=path, url=path)
+            Record(file=path, url=path)
         ]
         yield event.chain_result(chain)
