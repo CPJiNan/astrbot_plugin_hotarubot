@@ -66,6 +66,3 @@ class ImageStorage:
             self._save_images()
             return self._images[image_id]
         return None
-
-    def get_count(self) -> int:
-        return len(self._images)
