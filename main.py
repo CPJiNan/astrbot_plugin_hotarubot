@@ -405,6 +405,12 @@ class HotaruBotPlugin(Star):
     @filter.command("起死开战", alias={"起死開戦"})
     async def get_record(self, event: AstrMessageEvent):
         """发送起死開戦语音"""
+        sender_id = int(event.get_sender_id())
+        if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
+                                                                                                             "record.get"):
+            yield event.plain_result("你没有使用起死开战命令的权限哦。")
+            return
+
         path = str(self.record_dir / "起死開戦.wav")
         chain = [
             Record(file=path, url=path)
