@@ -403,7 +403,7 @@ class HotaruBotPlugin(Star):
         yield event.plain_result(f"已移除用户 {user_id} 的收萤员权限。")
 
     @filter.command("起死开战", alias={"起死開戦"})
-    async def remove_uploader(self, event: AstrMessageEvent):
+    async def get_record(self, event: AstrMessageEvent):
         """发送起死開戦语音"""
         path = str(self.record_dir / "起死開戦.wav")
         chain = [
