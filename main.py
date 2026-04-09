@@ -20,6 +20,7 @@ class HotaruBotPlugin(Star):
         self.user_storage = None
         self.image_storage = None
         self.images_dir = None
+        self.record_dir = None
 
     async def initialize(self):
         logger.info("插件加载成功。")
@@ -28,6 +29,8 @@ class HotaruBotPlugin(Star):
         self.image_storage = ImageStorage(storage_path)
         self.images_dir = storage_path / "images"
         self.images_dir.mkdir(parents=True, exist_ok=True)
+        self.record_dir = storage_path / "records"
+        self.record_dir.mkdir(parents=True, exist_ok=True)
 
     async def terminate(self):
         logger.info("插件卸载成功。")
@@ -398,3 +401,12 @@ class HotaruBotPlugin(Star):
         self.user_storage.remove_permission(user_id, "image.upload")
         self.user_storage.remove_permission(user_id, "image.description")
         yield event.plain_result(f"已移除用户 {user_id} 的收萤员权限。")
+
+    @filter.command("起死开战", alias={"起死開戦"})
+    async def remove_uploader(self, event: AstrMessageEvent):
+        """发送起死開戦语音"""
+        path = str(self.record_dir / "起死開戦.wav")
+        chain = [
+            Comp.Record(file=path, url=path)
+        ]
+        yield event.chain_result(chain)
