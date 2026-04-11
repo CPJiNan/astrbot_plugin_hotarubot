@@ -409,7 +409,7 @@ class HotaruBotPlugin(Star):
         if not result:
             return
 
-        tag = "{record:起死開戦}"
+        tag = "%record:起死開戦%"
         has_tag = False
         chain = result.chain
         components = []
