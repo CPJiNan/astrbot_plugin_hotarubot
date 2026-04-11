@@ -403,7 +403,7 @@ class HotaruBotPlugin(Star):
         self.user_storage.remove_permission(user_id, "image.description")
         yield event.plain_result(f"已移除用户 {user_id} 的收萤员权限。")
 
-    @filter.on_decorating_result
+    @filter.on_decorating_result()
     async def on_decorating_result(self, event: AstrMessageEvent):
         result = event.get_result()
         if not result:
