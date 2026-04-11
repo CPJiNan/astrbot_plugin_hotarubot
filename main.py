@@ -1,7 +1,10 @@
+import random
+import time
 from astrbot.api import logger
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.core.message.components import Plain, Image, Record
+from astrbot.core.message.message_event_result import MessageChain
 from pathlib import Path
 
 from .http import HttpUtils
@@ -165,7 +168,6 @@ class HotaruBotPlugin(Star):
     @filter.command("会萤吗")
     async def roll(self, event: AstrMessageEvent):
         """随机数生成器"""
-        import random
         value = random.randint(0, 100)
 
         if 0 <= value <= 19:
@@ -242,7 +244,6 @@ class HotaruBotPlugin(Star):
             yield event.plain_result("图库中暂无图片哦。")
             return
 
-        import time
         upload_time = time.strftime("%Y/%m/%d %H:%M:%S", time.localtime(image["uploadTime"] / 1000))
         desc = f"\n图片描述：{image['description']}" if image['description'] else ""
         uploader = f"\n图片上传者：{image['uploader']}" if image['uploader'] != -1 else ""
@@ -402,17 +403,49 @@ class HotaruBotPlugin(Star):
         self.user_storage.remove_permission(user_id, "image.description")
         yield event.plain_result(f"已移除用户 {user_id} 的收萤员权限。")
 
-    @filter.command("起死开战", alias={"起死開戦"})
-    async def get_record(self, event: AstrMessageEvent):
-        """发送起死開戦语音"""
-        sender_id = int(event.get_sender_id())
-        if not self.user_storage.has_permission(sender_id, "admin") and not self.user_storage.has_permission(sender_id,
-                                                                                                             "record.get"):
-            yield event.plain_result("你没有使用起死开战命令的权限哦。")
+    @filter.on_decorating_result
+    async def on_decorating_result(self, event: AstrMessageEvent):
+        result = event.get_result()
+        if not result:
             return
 
-        path = str(self.record_dir / "起死開戦.wav")
-        chain = [
-            Record(file=path, url=path)
-        ]
-        yield event.chain_result(chain)
+        tag = "{record:起死開戦}"
+        has_tag = False
+        chain = result.chain
+        components = []
+
+        if chain:
+            if isinstance(chain, str):
+                if tag in chain:
+                    has_tag = True
+                    text = chain.replace(tag, "").strip()
+                    if text:
+                        components.append(Plain(text))
+
+            elif isinstance(chain, MessageChain):
+                for component in chain.chain:
+                    if isinstance(component, Plain):
+                        if tag in component.text:
+                            has_tag = True
+                            text = component.text.replace(tag, "").strip()
+                            if text:
+                                components.append(Plain(text))
+                    else:
+                        components.append(component)
+
+            elif isinstance(chain, list):
+                for component in chain:
+                    if isinstance(component, Plain):
+                        if tag in component.text:
+                            has_tag = True
+                            text = component.text.replace(tag, "").strip()
+                            if text:
+                                components.append(Plain(text))
+                    else:
+                        components.append(component)
+
+        if has_tag:
+            index = random.randint(1, 8)
+            path = str(self.record_dir / f"起死開戦_{index}.wav")
+            components.append(Record(file=path, url=path))
+            result.chain = components
