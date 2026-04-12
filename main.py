@@ -445,7 +445,7 @@ class HotaruBotPlugin(Star):
                         components.append(component)
 
         if has_tag:
-            index = random.randint(1, 8)
+            index = random.randint(1, 7)
             path = str(self.record_dir / f"起死開戦_{index}.wav")
             components.append(Record(file=path, url=path))
             result.chain = components
