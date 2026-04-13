@@ -430,6 +430,8 @@ class HotaruBotPlugin(Star):
                             text = component.text.replace(tag, "").strip()
                             if text:
                                 components.append(Plain(text))
+                        else:
+                            components.append(component)
                     else:
                         components.append(component)
 
@@ -441,6 +443,8 @@ class HotaruBotPlugin(Star):
                             text = component.text.replace(tag, "").strip()
                             if text:
                                 components.append(Plain(text))
+                        else:
+                            components.append(component)
                     else:
                         components.append(component)
 
