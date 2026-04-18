@@ -1,11 +1,11 @@
 import random
 import time
+from pathlib import Path
+
 from astrbot.api import logger
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
 from astrbot.core.message.components import Plain, Image, Record
-from astrbot.core.message.message_event_result import MessageChain
-from pathlib import Path
 
 from .http import HttpUtils
 from .storage import UserStorage, ImageStorage

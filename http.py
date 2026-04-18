@@ -1,5 +1,6 @@
-import aiohttp
 from typing import Optional, Tuple
+
+import aiohttp
 
 
 class HttpUtils:
@@ -18,4 +19,3 @@ class HttpUtils:
                     return None, None
             except Exception:
                 return None, None
-        return None
