@@ -411,42 +411,19 @@ class HotaruBotPlugin(Star):
 
         tag = "%record:起死开战%"
         has_tag = False
-        chain = result.chain
         components = []
 
-        if chain:
-            if isinstance(chain, str):
-                if tag in chain:
+        for component in result.chain:
+            if isinstance(component, Plain):
+                if tag in component.text:
                     has_tag = True
-                    text = chain.replace(tag, "").strip()
+                    text = component.text.replace(tag, "").strip()
                     if text:
                         components.append(Plain(text))
-
-            elif isinstance(chain, MessageChain):
-                for component in chain.chain:
-                    if isinstance(component, Plain):
-                        if tag in component.text:
-                            has_tag = True
-                            text = component.text.replace(tag, "").strip()
-                            if text:
-                                components.append(Plain(text))
-                        else:
-                            components.append(component)
-                    else:
-                        components.append(component)
-
-            elif isinstance(chain, list):
-                for component in chain:
-                    if isinstance(component, Plain):
-                        if tag in component.text:
-                            has_tag = True
-                            text = component.text.replace(tag, "").strip()
-                            if text:
-                                components.append(Plain(text))
-                        else:
-                            components.append(component)
-                    else:
-                        components.append(component)
+                else:
+                    components.append(component)
+            else:
+                components.append(component)
 
         if has_tag:
             index = random.randint(1, 7)
