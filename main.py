@@ -4,19 +4,13 @@ from pathlib import Path
 
 from astrbot.api import logger
 from astrbot.api.event import filter, AstrMessageEvent
-from astrbot.api.star import Context, Star, register
+from astrbot.api.star import Context, Star
 from astrbot.core.message.components import Plain, Image, Record
 
 from .http import HttpUtils
 from .storage import UserStorage, ImageStorage
 
 
-@register(
-    "astrbot_plugin_hotarubot",
-    "季楠",
-    "HotaruBot",
-    "1.0.0"
-)
 class HotaruBotPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
